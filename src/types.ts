@@ -4,3 +4,11 @@ export enum BatteryStatus {
   CHARGING,
   FULL,
 }
+
+export interface BatteryLevelChangedEventPayload {
+  batteryLevel: number;
+}
+
+export interface BatteryStateChangedEventPayload {
+  batteryState: number;
+}

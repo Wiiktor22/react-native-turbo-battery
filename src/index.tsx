@@ -1,4 +1,4 @@
-import { NativeModules, Platform } from 'react-native';
+import { NativeModules, NativeEventEmitter, Platform } from 'react-native';
 import type { BatteryStatus } from './types';
 
 const LINKING_ERROR =
@@ -40,3 +40,8 @@ export async function getBatteryLevel(): Promise<number | void> {
 export async function getBatteryState(): Promise<BatteryStatus> {
   return await TurboBattery.getBatteryState();
 }
+
+export const TurboBatteryEventEmitter = new NativeEventEmitter(TurboBattery);
+
+export * from './types';
+export * from './constants';

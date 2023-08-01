@@ -1,17 +1,74 @@
 package com.turbobattery
 
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.BatteryManager
+import android.widget.Toast
 import com.facebook.react.bridge.ReactApplicationContext
+import com.facebook.react.modules.core.DeviceEventManagerModule
 import com.facebook.react.bridge.ReactMethod
 import com.facebook.react.bridge.Promise
+import com.facebook.react.bridge.Arguments
+
+private val BATTERY_STATE_CHANGED_EVENT_NAME = "TurboBattery.BatteryStateChangedEvent"
+private val BATTERY_LEVEL_CHANGED_EVENT_NAME = "TurboBattery.BatteryLevelChangedEvent"
 
 class TurboBatteryModule internal constructor(val context: ReactApplicationContext) :
   TurboBatterySpec(context) {
 
+  var savedBatteryLevel: Float = 0f
+  var savedBatteryState = BatteryState.UNKNOWN
+
   override fun getName(): String {
     return NAME
+  }
+
+  init {
+    val batteryFilter = IntentFilter()
+    batteryFilter.addAction(Intent.ACTION_BATTERY_CHANGED)
+    batteryFilter.addAction(Intent.ACTION_POWER_CONNECTED);
+    batteryFilter.addAction(Intent.ACTION_POWER_DISCONNECTED);
+
+    val batteryReceiver = object : BroadcastReceiver() {
+      override fun onReceive(internalContext: Context?, intent: Intent?) {
+        val currentBatteryStateAsInt = intent?.let { getBatteryStateFromIntent(it) }
+        currentBatteryStateAsInt?.let {
+          if (it != savedBatteryState.value) {
+            savedBatteryState = BatteryState.getStateByInt(it) ?: BatteryState.UNKNOWN
+
+            val params = Arguments.createMap().apply {
+              putInt("batteryState", mapBatteryManagerStatusToCustomBatteryStateEnum(it))
+            }
+
+            Toast.makeText(context, "New value: $it", Toast.LENGTH_SHORT)
+
+            context
+              .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
+              .emit(BATTERY_STATE_CHANGED_EVENT_NAME, params)
+          }
+        }
+
+        val currentBatteryLevel = intent?.let { getBatteryLevelFromIntent(it) }
+        currentBatteryLevel?.let {
+          if (it != savedBatteryLevel) {
+            savedBatteryLevel = it
+            val params = Arguments.createMap().apply {
+              putDouble("batteryLevel", it.toDouble())
+            }
+
+            Toast.makeText(context, "New battery level: $it", Toast.LENGTH_SHORT)
+
+            context
+              .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
+              .emit(BATTERY_LEVEL_CHANGED_EVENT_NAME, params)
+          }
+        }
+      }
+    }
+
+    context.registerReceiver(batteryReceiver, batteryFilter)
   }
 
   // Example method
@@ -19,6 +76,17 @@ class TurboBatteryModule internal constructor(val context: ReactApplicationConte
   @ReactMethod
   override fun multiply(a: Double, b: Double, promise: Promise) {
     promise.resolve(a * b)
+  }
+
+  private fun getBatteryLevelFromIntent(intent: Intent): Float? {
+    val level = intent?.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
+    val scale = intent?.getIntExtra(BatteryManager.EXTRA_SCALE, -1)
+
+    return if (level != -1 && level != null && scale != -1 && scale != null) {
+      level / scale.toFloat()
+    } else {
+      null
+    }
   }
 
   @ReactMethod
@@ -32,17 +100,17 @@ class TurboBatteryModule internal constructor(val context: ReactApplicationConte
       promise.reject("Unable to create Battery Intent!")
     }
 
-    val level = batteryIntent?.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
-    val scale = batteryIntent?.getIntExtra(BatteryManager.EXTRA_SCALE, -1)
+    val calculatedLevel = getBatteryLevelFromIntent(batteryIntent!!)
 
-    if (level != -1 && level != null && scale != -1 && scale != null) {
-      promise.resolve(level / scale.toFloat())
+    if (calculatedLevel != null) {
+      savedBatteryLevel = calculatedLevel
+      promise.resolve(calculatedLevel)
     } else {
       promise.reject("Unable to get battery level!")
     }
   }
 
-  private fun mapBatteryManagerStatusToCustomBatteryEnum(status: Int): Int {
+  private fun mapBatteryManagerStatusToCustomBatteryStateEnum(status: Int): Int {
     return when(status) {
       BatteryManager.BATTERY_STATUS_FULL -> BatteryState.FULL.value
       BatteryManager.BATTERY_STATUS_CHARGING -> BatteryState.CHARGING.value
@@ -51,6 +119,12 @@ class TurboBatteryModule internal constructor(val context: ReactApplicationConte
       else -> BatteryState.UNKNOWN.value
     }
   }
+
+  private fun getBatteryStateFromIntent(intent: Intent): Int {
+    val batteryStatus = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1)
+    return mapBatteryManagerStatusToCustomBatteryStateEnum(batteryStatus)
+  }
+
   @ReactMethod
   override fun getBatteryState(promise: Promise) {
     val batteryIntent: Intent? = context.applicationContext.registerReceiver(
@@ -63,8 +137,10 @@ class TurboBatteryModule internal constructor(val context: ReactApplicationConte
       return
     }
 
-    val batteryStatus = batteryIntent.getIntExtra(BatteryManager.EXTRA_STATUS, -1)
-    promise.resolve(mapBatteryManagerStatusToCustomBatteryEnum(batteryStatus))
+    val mappedBatteryStatus = getBatteryStateFromIntent(batteryIntent)
+    savedBatteryState = BatteryState.getStateByInt(mappedBatteryStatus) ?: BatteryState.UNKNOWN
+
+    promise.resolve(mappedBatteryStatus)
   }
 
   companion object {

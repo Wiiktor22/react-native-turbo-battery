@@ -1,7 +1,14 @@
 import * as React from 'react';
 
 import { StyleSheet, View, Text } from 'react-native';
-import { getBatteryLevel, getBatteryState } from 'react-native-turbo-battery';
+import {
+  TurboBatteryEventEmitter,
+  getBatteryLevel,
+  getBatteryState,
+  type BatteryStateChangedEventPayload,
+  type BatteryLevelChangedEventPayload,
+  TurboBatteryEvents,
+} from 'react-native-turbo-battery';
 
 export default function App() {
   const [batteryLevel, setBatteryLevel] = React.useState<number | undefined>();
@@ -12,6 +19,29 @@ export default function App() {
       if (typeof response === 'number') setBatteryLevel(response);
     });
     getBatteryState().then(setBatteryState);
+
+    const stateEventListener = TurboBatteryEventEmitter.addListener(
+      TurboBatteryEvents.BatteryStateEvent,
+      (event: BatteryStateChangedEventPayload) => {
+        console.log('===== NEW EVENT');
+        console.log(event);
+        setBatteryState(event.batteryState);
+      }
+    );
+
+    const levelEventListener = TurboBatteryEventEmitter.addListener(
+      TurboBatteryEvents.BatteryLevelEvent,
+      (event: BatteryLevelChangedEventPayload) => {
+        console.log('===== NEW LEVEL EVENT');
+        console.log(event);
+        setBatteryLevel(event.batteryLevel);
+      }
+    );
+
+    return () => {
+      stateEventListener.remove();
+      levelEventListener.remove();
+    };
   }, []);
 
   return (
