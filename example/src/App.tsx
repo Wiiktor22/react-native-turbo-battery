@@ -1,18 +1,23 @@
 import * as React from 'react';
 
 import { StyleSheet, View, Text } from 'react-native';
-import { multiply } from 'react-native-turbo-battery';
+import { getBatteryLevel, getBatteryState } from 'react-native-turbo-battery';
 
 export default function App() {
-  const [result, setResult] = React.useState<number | undefined>();
+  const [batteryLevel, setBatteryLevel] = React.useState<number | undefined>();
+  const [batteryState, setBatteryState] = React.useState<number | undefined>();
 
   React.useEffect(() => {
-    multiply(3, 7).then(setResult);
+    getBatteryLevel().then((response) => {
+      if (typeof response === 'number') setBatteryLevel(response);
+    });
+    getBatteryState().then(setBatteryState);
   }, []);
 
   return (
     <View style={styles.container}>
-      <Text>Result: {result}</Text>
+      <Text>Battery Level: {batteryLevel}</Text>
+      <Text>Battery State: {batteryState}</Text>
     </View>
   );
 }

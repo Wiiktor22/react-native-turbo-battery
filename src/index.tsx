@@ -1,4 +1,5 @@
 import { NativeModules, Platform } from 'react-native';
+import type { BatteryStatus } from './types';
 
 const LINKING_ERROR =
   `The package 'react-native-turbo-battery' doesn't seem to be linked. Make sure: \n\n` +
@@ -26,4 +27,16 @@ const TurboBattery = TurboBatteryModule
 
 export function multiply(a: number, b: number): Promise<number> {
   return TurboBattery.multiply(a, b);
+}
+
+export async function getBatteryLevel(): Promise<number | void> {
+  try {
+    return await TurboBattery.getBatteryLevel();
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+export async function getBatteryState(): Promise<BatteryStatus> {
+  return await TurboBattery.getBatteryState();
 }
