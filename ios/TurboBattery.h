@@ -5,8 +5,9 @@
 @interface TurboBattery : NSObject <NativeTurboBatterySpec>
 #else
 #import <React/RCTBridgeModule.h>
+#import <React/RCTEventEmitter.h>
 
-@interface TurboBattery : NSObject <RCTBridgeModule>
+@interface TurboBattery : RCTEventEmitter<RCTBridgeModule>
 #endif
 
 @end

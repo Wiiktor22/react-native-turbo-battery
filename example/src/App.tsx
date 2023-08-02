@@ -46,8 +46,8 @@ export default function App() {
 
   return (
     <View style={styles.container}>
-      <Text>Battery Level: {batteryLevel}</Text>
-      <Text>Battery State: {batteryState}</Text>
+      <Text>Battery Level: {batteryLevel ?? ''}</Text>
+      <Text>Battery State: {batteryState ?? ''}</Text>
     </View>
   );
 }
@@ -57,6 +57,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: 'white',
   },
   box: {
     width: 60,
