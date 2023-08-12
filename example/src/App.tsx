@@ -8,11 +8,16 @@ import {
   type BatteryStateChangedEventPayload,
   type BatteryLevelChangedEventPayload,
   TurboBatteryEvents,
+  getLowPowerState,
+  type LowPowerStateChangedEventPayload,
 } from 'react-native-turbo-battery';
 
 export default function App() {
   const [batteryLevel, setBatteryLevel] = React.useState<number | undefined>();
   const [batteryState, setBatteryState] = React.useState<number | undefined>();
+  const [lowPowerEnabled, setLowPowerEnabled] = React.useState<
+    boolean | undefined
+  >();
 
   React.useEffect(() => {
     getBatteryLevel().then((response) => {
@@ -20,10 +25,18 @@ export default function App() {
     });
     getBatteryState().then(setBatteryState);
 
+    getLowPowerState(
+      (isEnabled) => setLowPowerEnabled(isEnabled),
+      (error) => {
+        console.log(`Error found reading Low Power State: ${error}`);
+        setLowPowerEnabled(undefined);
+      }
+    );
+
     const stateEventListener = TurboBatteryEventEmitter.addListener(
       TurboBatteryEvents.BatteryStateEvent,
       (event: BatteryStateChangedEventPayload) => {
-        console.log('===== NEW EVENT');
+        console.log('===== NEW BATTERY STATE EVENT');
         console.log(event);
         setBatteryState(event.batteryState);
       }
@@ -38,9 +51,19 @@ export default function App() {
       }
     );
 
+    const lowPowerEventListener = TurboBatteryEventEmitter.addListener(
+      TurboBatteryEvents.LowPowerStateEvent,
+      (event: LowPowerStateChangedEventPayload) => {
+        console.log('===== NEW LOW POWER EVENT');
+        console.log(event);
+        setLowPowerEnabled(event.isEnabled);
+      }
+    );
+
     return () => {
       stateEventListener.remove();
       levelEventListener.remove();
+      lowPowerEventListener.remove();
     };
   }, []);
 
@@ -48,6 +71,7 @@ export default function App() {
     <View style={styles.container}>
       <Text>Battery Level: {batteryLevel ?? ''}</Text>
       <Text>Battery State: {batteryState ?? ''}</Text>
+      <Text>Low Power State: {String(lowPowerEnabled)}</Text>
     </View>
   );
 }

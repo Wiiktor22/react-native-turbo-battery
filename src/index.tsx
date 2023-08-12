@@ -41,6 +41,21 @@ export async function getBatteryState(): Promise<BatteryStatus> {
   return await TurboBattery.getBatteryState();
 }
 
+export function getLowPowerState(
+  successCallback: (isEnabled: boolean) => void,
+  errorCallback: (error: any) => void
+): void {
+  const platformSpecificMethod =
+    Platform.OS === 'ios'
+      ? TurboBattery.getLowPowerModeEnabled
+      : TurboBattery.getPowerSavingState;
+
+  platformSpecificMethod(
+    (state: { isEnabled: boolean }) => successCallback(state.isEnabled),
+    errorCallback
+  );
+}
+
 export const TurboBatteryEventEmitter = new NativeEventEmitter(TurboBattery);
 
 export * from './types';

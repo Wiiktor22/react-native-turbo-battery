@@ -12,3 +12,7 @@ export interface BatteryLevelChangedEventPayload {
 export interface BatteryStateChangedEventPayload {
   batteryState: number;
 }
+
+export interface LowPowerStateChangedEventPayload {
+  isEnabled: boolean;
+}

@@ -13,7 +13,7 @@ RCT_EXPORT_MODULE()
 
 - (NSArray<NSString *> *)supportedEvents
 {
-    return @[@"TurboBattery.BatteryStateChangedEvent", @"TurboBattery.BatteryLevelChangedEvent"];
+    return @[@"TurboBattery.BatteryStateChangedEvent", @"TurboBattery.BatteryLevelChangedEvent", @"TurboBattery.LowPowerModeChangedEvent"];
 }
 
 - (id)init
@@ -29,6 +29,11 @@ RCT_EXPORT_MODULE()
         [[NSNotificationCenter defaultCenter] addObserver:self
                                               selector:@selector(batteryStateDidChange:)
                                               name:UIDeviceBatteryStateDidChangeNotification
+                                              object: nil];
+
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                              selector:@selector(lowPowerModeDidChange:)
+                                              name:NSProcessInfoPowerStateDidChangeNotification
                                               object: nil];
     }
     return self;
@@ -86,6 +91,30 @@ RCT_EXPORT_METHOD(getBatteryState:(RCTPromiseResolveBlock)resolve rejecter:(RCTP
 
     int batteryState = self.getBatteryState;
     [self sendEventWithName:@"TurboBattery.BatteryStateChangedEvent" body:@{ @"batteryState": @(batteryState)}];
+}
+
+- (BOOL) getLowPowerModeEnabled {
+    return [[NSProcessInfo processInfo] isLowPowerModeEnabled];
+}
+
+RCT_EXPORT_METHOD(getLowPowerModeEnabled: (RCTResponseSenderBlock)successCallback
+                  errorCallback: (RCTResponseSenderBlock)errorCallback)
+{
+    @try {
+        BOOL isEnabled = self.getLowPowerModeEnabled;
+        successCallback(@[@{ @"isEnabled": @(isEnabled) }]);
+    } @catch (NSException *e) {
+        errorCallback(@[e]);
+    }
+}
+
+- (void) lowPowerModeDidChange:(NSNotification *)notification {
+    if (!hasListeners) {
+        return;
+    }
+
+    BOOL isEnabled = self.getLowPowerModeEnabled;
+    [self sendEventWithName:@"TurboBattery.LowPowerModeChangedEvent" body:@{ @"isEnabled": @(isEnabled) }];
 }
 
 // Don't compile this code when we build for the old architecture.
