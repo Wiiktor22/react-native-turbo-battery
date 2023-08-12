@@ -21,7 +21,7 @@ private val BATTERY_POWER_SAVING_CHANGED_EVENT_NAME = "TurboBattery.LowPowerMode
 class TurboBatteryModule internal constructor(val context: ReactApplicationContext) :
   TurboBatterySpec(context) {
 
-  var savedBatteryLevel: Float = 0f
+  var savedBatteryLevel: Double = 0.0
   var savedBatteryState = BatteryState.UNKNOWN
   var savedPowerSavingEnabled: Boolean = false
 
@@ -93,12 +93,12 @@ class TurboBatteryModule internal constructor(val context: ReactApplicationConte
     promise.resolve(a * b)
   }
 
-  private fun getBatteryLevelFromIntent(intent: Intent): Float? {
+  private fun getBatteryLevelFromIntent(intent: Intent): Double? {
     val level = intent?.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
     val scale = intent?.getIntExtra(BatteryManager.EXTRA_SCALE, -1)
 
     return if (level != -1 && level != null && scale != -1 && scale != null) {
-      level / scale.toFloat()
+      level / scale.toDouble()
     } else {
       null
     }
@@ -126,13 +126,13 @@ class TurboBatteryModule internal constructor(val context: ReactApplicationConte
   }
 
   @ReactMethod(isBlockingSynchronousMethod = true)
-  fun getBatteryLevelSync(): Float? {
+  override fun getBatteryLevelSync(): Double {
     val batteryIntent: Intent? = context.applicationContext.registerReceiver(
       null,
       IntentFilter(Intent.ACTION_BATTERY_CHANGED)
-    ) ?: return null
+    ) ?: return -1.0
 
-    return getBatteryLevelFromIntent(batteryIntent!!)
+    return getBatteryLevelFromIntent(batteryIntent!!) ?: -1.0
   }
 
   private fun mapBatteryManagerStatusToCustomBatteryStateEnum(status: Int): Int {
@@ -173,7 +173,8 @@ class TurboBatteryModule internal constructor(val context: ReactApplicationConte
     return powerManager?.isPowerSaveMode ?: false
   }
 
-  @ReactMethod fun getPowerSavingState(successCallback: Callback, errorCallback: Callback) {
+  @ReactMethod
+  override fun getLowPowerState(successCallback: Callback, errorCallback: Callback) {
     try {
       val params = Arguments.createMap().apply {
         putBoolean("isEnabled", getPowerSavingStateFromContext(context))

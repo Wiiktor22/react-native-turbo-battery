@@ -1,6 +1,7 @@
 import type { TurboModule } from 'react-native';
 import { TurboModuleRegistry } from 'react-native';
 import type { BatteryStatus } from './types';
+import type { Double } from 'react-native/Libraries/Types/CodegenTypes';
 
 export interface Spec extends TurboModule {
   multiply(a: number, b: number): Promise<number>;
@@ -8,9 +9,9 @@ export interface Spec extends TurboModule {
   getBatteryState(): Promise<BatteryStatus>;
   getLowPowerState(
     successCallback: (isEnabled: boolean) => void,
-    errorCallback: (error: any) => void
+    errorCallback: () => void
   ): void;
-  getBatteryLevelSync(): number | null;
+  getBatteryLevelSync(): Double;
 }
 
 export default TurboModuleRegistry.getEnforcing<Spec>('TurboBattery');

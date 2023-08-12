@@ -52,7 +52,7 @@ export function getLowPowerState(
   const platformSpecificMethod =
     Platform.OS === 'ios'
       ? TurboBattery.getLowPowerModeEnabled
-      : TurboBattery.getPowerSavingState;
+      : TurboBattery.getLowPowerState;
 
   platformSpecificMethod(
     (state: { isEnabled: boolean }) => successCallback(state.isEnabled),
