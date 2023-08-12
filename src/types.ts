@@ -5,6 +5,12 @@ export enum BatteryStatus {
   FULL,
 }
 
+export enum TurboBatteryEvents {
+  BatteryStateEvent = 'TurboBattery.BatteryStateChangedEvent',
+  BatteryLevelEvent = 'TurboBattery.BatteryLevelChangedEvent',
+  LowPowerStateEvent = 'TurboBattery.LowPowerModeChangedEvent',
+}
+
 export interface BatteryLevelChangedEventPayload {
   batteryLevel: number;
 }

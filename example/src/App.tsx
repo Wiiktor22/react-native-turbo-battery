@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { StyleSheet, View, Text } from 'react-native';
+import { StyleSheet, View, Text, Button, Alert } from 'react-native';
 import {
   TurboBatteryEventEmitter,
   getBatteryLevel,
@@ -10,6 +10,7 @@ import {
   TurboBatteryEvents,
   getLowPowerState,
   type LowPowerStateChangedEventPayload,
+  getBatteryLevelSync,
 } from 'react-native-turbo-battery';
 
 export default function App() {
@@ -67,11 +68,22 @@ export default function App() {
     };
   }, []);
 
+  const testGetBatteryLevelSync = () => {
+    Alert.alert(
+      'Battery level sync',
+      `Battery level sync: ${getBatteryLevelSync()}`
+    );
+  };
+
   return (
     <View style={styles.container}>
       <Text>Battery Level: {batteryLevel ?? ''}</Text>
       <Text>Battery State: {batteryState ?? ''}</Text>
       <Text>Low Power State: {String(lowPowerEnabled)}</Text>
+      <Button
+        title="Test getBatteryLevelSync"
+        onPress={testGetBatteryLevelSync}
+      />
     </View>
   );
 }

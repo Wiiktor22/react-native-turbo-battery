@@ -125,6 +125,16 @@ class TurboBatteryModule internal constructor(val context: ReactApplicationConte
     }
   }
 
+  @ReactMethod(isBlockingSynchronousMethod = true)
+  fun getBatteryLevelSync(): Float? {
+    val batteryIntent: Intent? = context.applicationContext.registerReceiver(
+      null,
+      IntentFilter(Intent.ACTION_BATTERY_CHANGED)
+    ) ?: return null
+
+    return getBatteryLevelFromIntent(batteryIntent!!)
+  }
+
   private fun mapBatteryManagerStatusToCustomBatteryStateEnum(status: Int): Int {
     return when(status) {
       BatteryManager.BATTERY_STATUS_FULL -> BatteryState.FULL.value

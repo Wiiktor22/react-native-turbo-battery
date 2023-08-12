@@ -10,6 +10,7 @@ export interface Spec extends TurboModule {
     successCallback: (isEnabled: boolean) => void,
     errorCallback: (error: any) => void
   ): void;
+  getBatteryLevelSync(): number | null;
 }
 
 export default TurboModuleRegistry.getEnforcing<Spec>('TurboBattery');

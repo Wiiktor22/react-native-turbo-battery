@@ -37,6 +37,10 @@ export async function getBatteryLevel(): Promise<number | void> {
   }
 }
 
+export function getBatteryLevelSync() {
+  return TurboBattery.getBatteryLevelSync();
+}
+
 export async function getBatteryState(): Promise<BatteryStatus> {
   return await TurboBattery.getBatteryState();
 }
@@ -59,4 +63,3 @@ export function getLowPowerState(
 export const TurboBatteryEventEmitter = new NativeEventEmitter(TurboBattery);
 
 export * from './types';
-export * from './constants';
