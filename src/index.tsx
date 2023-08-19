@@ -29,12 +29,8 @@ export function multiply(a: number, b: number): Promise<number> {
   return TurboBattery.multiply(a, b);
 }
 
-export async function getBatteryLevel(): Promise<number | void> {
-  try {
-    return await TurboBattery.getBatteryLevel();
-  } catch (error) {
-    console.error(error);
-  }
+export async function getBatteryLevel(): Promise<number> {
+  return await TurboBattery.getBatteryLevel();
 }
 
 export function getBatteryLevelSync() {
@@ -49,12 +45,7 @@ export function getLowPowerState(
   successCallback: (isEnabled: boolean) => void,
   errorCallback: (error: any) => void
 ): void {
-  const platformSpecificMethod =
-    Platform.OS === 'ios'
-      ? TurboBattery.getLowPowerModeEnabled
-      : TurboBattery.getLowPowerState;
-
-  platformSpecificMethod(
+  TurboBattery.getLowPowerState(
     (state: { isEnabled: boolean }) => successCallback(state.isEnabled),
     errorCallback
   );

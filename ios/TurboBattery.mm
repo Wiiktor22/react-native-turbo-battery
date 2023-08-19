@@ -1,4 +1,5 @@
 #import "TurboBattery.h"
+#include <Foundation/Foundation.h>
 
 @implementation TurboBattery
 {
@@ -59,19 +60,23 @@ RCT_EXPORT_METHOD(multiply:(double)a
     resolve(result);
 }
 
-- (float) getBatteryLevel {
-    return [[UIDevice currentDevice] batteryLevel];
+- (NSNumber *) getBatteryLevel {
+    return [NSNumber numberWithFloat: [[UIDevice currentDevice] batteryLevel]];
 }
 
-RCT_EXPORT_METHOD(getBatteryLevel:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
-    resolve(@(self.getBatteryLevel));
+RCT_EXPORT_METHOD(getBatteryLevel:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
+    resolve([self getBatteryLevel]);
+}
+
+RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(getBatteryLevelSync) {
+    return [self getBatteryLevel];
 }
 
 - (int) getBatteryState {
     return [[UIDevice currentDevice] batteryState];
 }
 
-RCT_EXPORT_METHOD(getBatteryState:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+RCT_EXPORT_METHOD(getBatteryState:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
     resolve(@(self.getBatteryState));
 }
 
@@ -80,8 +85,8 @@ RCT_EXPORT_METHOD(getBatteryState:(RCTPromiseResolveBlock)resolve rejecter:(RCTP
         return;
     }
 
-    float batteryLevel = self.getBatteryLevel;
-    [self sendEventWithName:@"TurboBattery.BatteryLevelChangedEvent" body:@{ @"batteryLevel": @(batteryLevel)}];
+    NSNumber * batteryLevel = self.getBatteryLevel;
+    [self sendEventWithName:@"TurboBattery.BatteryLevelChangedEvent" body:@{ @"batteryLevel": batteryLevel}];
 }
 
 - (void) batteryStateDidChange:(NSNotification *)notification {
@@ -97,7 +102,7 @@ RCT_EXPORT_METHOD(getBatteryState:(RCTPromiseResolveBlock)resolve rejecter:(RCTP
     return [[NSProcessInfo processInfo] isLowPowerModeEnabled];
 }
 
-RCT_EXPORT_METHOD(getLowPowerModeEnabled: (RCTResponseSenderBlock)successCallback
+RCT_EXPORT_METHOD(getLowPowerState: (RCTResponseSenderBlock)successCallback
                   errorCallback: (RCTResponseSenderBlock)errorCallback)
 {
     @try {
