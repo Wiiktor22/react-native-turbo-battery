@@ -18,4 +18,8 @@ abstract class TurboBatterySpec internal constructor(context: ReactApplicationCo
 
   abstract fun getLowPowerState(successCallback: Callback, errorCallback: Callback)
 
+  abstract fun addListener(eventName: String?)
+
+  abstract fun removeListeners(count: Double)
+
 }

@@ -185,6 +185,10 @@ class TurboBatteryModule internal constructor(val context: ReactApplicationConte
     }
   }
 
+  override fun addListener(eventName: String?) = Unit
+
+  override fun removeListeners(count: Double) = Unit
+
   companion object {
     const val NAME = "TurboBattery"
   }

@@ -25,31 +25,26 @@ const TurboBattery = TurboBatteryModule
       }
     );
 
-export function multiply(a: number, b: number): Promise<number> {
-  return TurboBattery.multiply(a, b);
-}
+export const multiply = (a: number, b: number): Promise<number> =>
+  TurboBattery.multiply(a, b);
 
-export async function getBatteryLevel(): Promise<number> {
-  return await TurboBattery.getBatteryLevel();
-}
+export const getBatteryLevel = async (): Promise<number> =>
+  await TurboBattery.getBatteryLevel();
 
-export function getBatteryLevelSync() {
-  return TurboBattery.getBatteryLevelSync();
-}
+export const getBatteryLevelSync = () => TurboBattery.getBatteryLevelSync();
 
-export async function getBatteryState(): Promise<BatteryStatus> {
-  return await TurboBattery.getBatteryState();
-}
+export const getBatteryState = async (): Promise<BatteryStatus> =>
+  await TurboBattery.getBatteryState();
 
-export function getLowPowerState(
+export const getLowPowerState = (
   successCallback: (isEnabled: boolean) => void,
   errorCallback: (error: any) => void
-): void {
+): void => {
   TurboBattery.getLowPowerState(
     (state: { isEnabled: boolean }) => successCallback(state.isEnabled),
     errorCallback
   );
-}
+};
 
 export const TurboBatteryEventEmitter = new NativeEventEmitter(TurboBattery);
 
